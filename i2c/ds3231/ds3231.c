@@ -69,13 +69,13 @@ static int ds3231_get_time(struct device *dev, struct rtc_time *time)
 		return ret;
 	}
 
-	time->tm_sec = bcd2bin(reg[0]);
-	time->tm_min = bcd2bin(reg[1]);
-	time->tm_hour = bcd2bin(reg[2]);
-	time->tm_wday = reg[3];
-	time->tm_mday = bcd2bin(reg[4]);
-	time->tm_mon = bcd2bin(reg[5] & 0x7F);
-	time->tm_year = bcd2bin(reg[6]);
+	time->tm_sec = bcd2bin(reg[0] & 0x7f);
+	time->tm_min = bcd2bin(reg[1] & 0x7f);
+	time->tm_hour = bcd2bin(reg[2] & 0x3f);
+	time->tm_wday = (reg[3] & 0x07) - 1;
+	time->tm_mday = bcd2bin(reg[4] & 0x3f);
+	time->tm_mon = bcd2bin(reg[5]) - 1;
+	time->tm_year = bcd2bin(reg[6]) + 100;
 
 	dev_info(dev, "%s secs=%d, mins=%d, "
 		"hours=%d, mday=%d, mon=%d, year=%d, wday=%d\n",
@@ -185,7 +185,7 @@ static int ds3231_detect(struct i2c_client *client, struct i2c_board_info *info)
 	return 0;
 }
 
-static unsigned short addressList[] = { 0x68 };
+static unsigned short addressList[] = { 0x68, I2C_CLIENT_END };
 
 static struct i2c_device_id i2c_idtable[] = {
       { "ds3231", 0 },
@@ -210,8 +210,9 @@ static struct i2c_driver ds3231_driver = {
 	.id_table       = i2c_idtable,
 	.probe          = ds3231_probe,
 	.remove         = ds3231_remove,
+	.detect		= ds3231_detect,
+	.address_list	= addressList,
 };
-
 
 /* __init and __exit */
 module_i2c_driver(ds3231_driver);

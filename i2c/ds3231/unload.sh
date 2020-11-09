@@ -24,5 +24,5 @@
 
 #!/bin/sh
 echo 0x68 | sudo tee /sys/class/i2c-adapter/i2c-1/delete_device
-sudo rmmod ds3231
+sudo modprobe -r ds3231
 

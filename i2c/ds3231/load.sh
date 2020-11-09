@@ -24,6 +24,10 @@
 
 #!/bin/sh
 
+sudo cp ds3231.ko /lib/modules/$(uname -r)/kernel/drivers/rtc/
+sleep 0.5
+sudo depmod -a
+
 if [ -z "$(lsmod | grep i2c_dev)" ]; then
     sudo modprobe i2c_dev
 fi
@@ -33,7 +37,7 @@ if [ -z "$(lsmod | grep i2c-bcm2835)" ]; then
 fi
 
 if [ -z "$(lsmod | grep ds3231)" ]; then
-    sudo insmod ds3231.ko
+    sudo modprobe ds3231
     echo 'ds3231 0x68' | sudo tee /sys/class/i2c-adapter/i2c-1/new_device
 fi
 
